@@ -1,27 +1,165 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Слоты для гоев</title>
+    <title>Slot Machine</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
-        h1 {
-            font-size: 2em;
+        .slot-machine {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            background-color: #fff;
+            padding: 10px;
+            border: 2px solid #000;
+            position: relative;
+        }
+        .slot-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            font-size: 24px;
             font-weight: bold;
-            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        .expensive {
+            color: gold;
+        }
+        .cheap {
+            color: silver;
+        }
+        .winning {
+            background-color: #FFD700; /* Gold background for winning symbols */
+        }
+        #spinButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #spinButton::before {
+            content: "🔄 ";
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #score {
+            margin-top: 10px;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Гой, слотов пока нет крути сосок!</h1>
+
+<div class="slot-machine" id="slotMachine">
+    <!-- Cells will be generated here -->
+</div>
+<button id="spinButton">Spin</button>
+<div id="result"></div>
+<div id="score">Score: 0</div>
+
+<script>
+    const slotMachine = document.getElementById('slotMachine');
+    const spinButton = document.getElementById('spinButton');
+    const result = document.getElementById('result');
+    const scoreDisplay = document.getElementById('score');
+
+    const expensiveSymbols = ['💎', '👑', '🪙', '🪐', '💰'];
+    const cheapSymbols = ['🍎', '🍋', '🍒', '🍇', '🍉'];
+    const symbols = [...expensiveSymbols, ...cheapSymbols];
+    let score = 0;
+
+    function getRandomSymbol() {
+        const randomIndex = Math.floor(Math.random() * symbols.length);
+        return symbols[randomIndex];
+    }
+
+    function generateSlotGrid() {
+        slotMachine.innerHTML = '';
+        const grid = [];
+        for (let i = 0; i < 3; i++) {
+            grid[i] = [];
+            for (let j = 0; j < 3; j++) {
+                const cell = document.createElement('div');
+                const symbol = getRandomSymbol();
+                cell.textContent = symbol;
+                cell.classList.add('slot-cell');
+                if (expensiveSymbols.includes(symbol)) {
+                    cell.classList.add('expensive');
+                } else {
+                    cell.classList.add('cheap');
+                }
+                slotMachine.appendChild(cell);
+                grid[i][j] = cell;
+            }
+        }
+        return grid;
+    }
+
+    function checkWin(grid) {
+        // Reset result
+        result.textContent = '';
+
+        // Check rows for win
+        for (let i = 0; i < 3; i++) {
+            if (grid[i][0].textContent === grid[i][1].textContent && grid[i][1].textContent === grid[i][2].textContent) {
+                grid[i][0].classList.add('winning');
+                grid[i][1].classList.add('winning');
+                grid[i][2].classList.add('winning');
+                result.textContent = 'You Win! 🎉';
+                score += 10; // Increase score for win
+                scoreDisplay.textContent = `Score: ${score}`;
+                return;
+            }
+        }
+
+        // No win
+        result.textContent = 'Try Again!';
+    }
+
+    function spin() {
+        const grid = Array.from(slotMachine.children);
+
+        // Fade out current symbols
+        grid.forEach(cell => {
+            cell.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+            // Generate new grid and fade in new symbols
+            const newGrid = generateSlotGrid();
+            newGrid.forEach(row => {
+                row.forEach(cell => {
+                    cell.style.opacity = '1';
+                });
+            });
+
+            // Check win after new symbols appear
+            checkWin(newGrid);
+        }, 500); // Delay for fade out effect
+    }
+
+    spinButton.addEventListener('click', spin);
+
+    // Initial generation
+    generateSlotGrid();
+</script>
+
 </body>
 </html>
